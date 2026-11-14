@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Rover Control</string>
+    <string name="app_subtitle">Monitor Ambiental</string>
+
+    <!-- Navigation -->
+    <string name="nav_control">Control</string>
+    <string name="nav_telemetry">Telemetry</string>
+    <string name="nav_back">Back</string>
+
+    <!-- Connection states -->
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_connecting">Connecting…</string>
+    <string name="status_reconnecting">Reconnecting…</string>
+    <string name="status_connected_to">Connected to %1$s</string>
+    <string name="status_demo">DEMO</string>
+    <string name="status_unknown_device">rover</string>
+    <string name="content_description_connection_status">Connection status</string>
+
+    <!-- Connection screen -->
+    <string name="connection_title">Connection</string>
+    <string name="connection_paired_devices">Paired devices</string>
+    <string name="connection_refresh">Refresh</string>
+    <string name="connection_connect">Connect</string>
+    <string name="connection_disconnect">Disconnect</string>
+    <string name="connection_reconnect">Reconnect</string>
+    <string name="connection_empty">No paired devices — pair your HC-05 in Android settings first.</string>
+    <string name="connection_tip">Tip: pair HC-05 in Android Bluetooth settings, then return here.</string>
+    <string name="connection_bluetooth_off">Bluetooth is off</string>
+    <string name="connection_enable_bluetooth">Enable Bluetooth</string>
+    <string name="connection_permission_title">Bluetooth permission required</string>
+    <string name="connection_permission_rationale">Rover Control needs Bluetooth access to list paired devices and connect to your HC-05 module.</string>
+    <string name="connection_permission_denied">Bluetooth permission denied. Enable it in Settings to connect.</string>
+    <string name="connection_grant_permission">Grant permission</string>
+    <string name="connection_open_settings">Open settings</string>
+    <string name="connection_demo_mode">Demo Mode (no hardware)</string>
+    <string name="connection_demo_mode_description">Simulate telemetry and controls without the rover.</string>
+    <string name="connection_failed">Connection failed: %1$s</string>
+    <string name="connection_bluetooth_unavailable">Bluetooth is not available on this device.</string>
+
+    <!-- Control screen -->
+    <string name="control_title">Control</string>
+    <string name="control_speed">Speed %1$d%%</string>
+    <string name="control_headlights">Headlights</string>
+    <string name="control_reset_speed">Reset Speed</string>
+    <string name="control_input_mode">Input mode</string>
+    <string name="control_input_joystick">Joystick</string>
+    <string name="control_input_dpad">D-pad</string>
+    <string name="control_stopped">STOPPED</string>
+    <string name="control_rearm">Rearm</string>
+    <string name="control_emergency_stop">Emergency stop</string>
+    <string name="control_estop">E-STOP</string>
+    <string name="control_forward">Forward</string>
+    <string name="control_backward">Backward</string>
+    <string name="control_left">Left</string>
+    <string name="control_right">Right</string>
+    <string name="control_stop">Stop</string>
+    <string name="control_direction_fwd">FWD</string>
+    <string name="control_direction_back">BACK</string>
+    <string name="control_direction_left">LEFT</string>
+    <string name="control_direction_right">RIGHT</string>
+    <string name="control_settings">Control settings</string>
+    <string name="control_stopped_message">Emergency stop engaged. Movement is disabled until you rearm.</string>
+
+    <!-- Telemetry screen -->
+    <string name="telemetry_title">Telemetry</string>
+    <string name="telemetry_updated">Updated %1$.1f s ago</string>
+    <string name="telemetry_updated_now">Updated just now</string>
+    <string name="telemetry_stale">Stale</string>
+    <string name="telemetry_no_data">No data</string>
+    <string name="telemetry_waiting">Waiting for telemetry…</string>
+    <string name="telemetry_temperature">Temperature</string>
+    <string name="telemetry_humidity">Humidity</string>
+    <string name="telemetry_light">Light</string>
+    <string name="telemetry_distance">Distance</string>
+    <string name="telemetry_inclination">Inclination</string>
+    <string name="telemetry_hint_hot">Hot</string>
+    <string name="telemetry_hint_humid">Humid</string>
+    <string name="telemetry_hint_dark">Dark</string>
+    <string name="telemetry_hint_dim">Dim</string>
+    <string name="telemetry_hint_bright">Bright</string>
+    <string name="telemetry_hint_danger">Danger</string>
+    <string name="telemetry_hint_near">Near</string>
+    <string name="telemetry_hint_tilt">Tilt!</string>
+    <string name="telemetry_hint_clear">Clear</string>
+
+    <!-- Units -->
+    <string name="unit_celsius">°C</string>
+    <string name="unit_percent">%</string>
+    <string name="unit_centimeters">cm</string>
+    <string name="unit_degrees">°</string>
+    <string name="unit_raw_adc">ADC</string>
+    <string name="value_placeholder">—</string>
+
+    <!-- Common -->
+    <string name="common_close">Close</string>
+</resources>
