@@ -11,6 +11,9 @@ import com.example.rover_control.data.settings.SettingsRepository
  */
 class RoverApplication : Application() {
 
+    lateinit var bluetoothManager: BluetoothManager
+        private set
+
     lateinit var settingsRepository: SettingsRepository
         private set
 
@@ -19,7 +22,8 @@ class RoverApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        bluetoothManager = BluetoothManager(this)
         settingsRepository = SettingsRepository(this)
-        roverRepository = RoverRepository(BluetoothManager(this))
+        roverRepository = RoverRepository(bluetoothManager)
     }
 }

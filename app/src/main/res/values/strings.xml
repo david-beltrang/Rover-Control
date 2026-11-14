@@ -38,10 +38,20 @@
     <string name="connection_demo_mode_description">Simulate telemetry and controls without the rover.</string>
     <string name="connection_failed">Connection failed: %1$s</string>
     <string name="connection_bluetooth_unavailable">Bluetooth is not available on this device.</string>
+    <string name="connection_device_unavailable">Device unavailable. Refresh the list and try again.</string>
+    <string name="connection_last_used">Last used</string>
+    <string name="connection_continue">Continue</string>
+    <string name="connection_connected">Connected</string>
+    <string name="connection_demo_active">Demo Mode active — no hardware required.</string>
+    <string name="content_description_refresh_devices">Refresh paired devices</string>
+    <string name="content_description_open_settings">Open control settings</string>
+    <string name="content_description_headlights">Headlights</string>
+    <string name="content_description_emergency_stop">Emergency stop</string>
 
     <!-- Control screen -->
     <string name="control_title">Control</string>
-    <string name="control_speed">Speed %1$d%%</string>
+    <string name="control_speed">Speed</string>
+    <string name="control_speed_value">Speed %1$d%%</string>
     <string name="control_headlights">Headlights</string>
     <string name="control_reset_speed">Reset Speed</string>
     <string name="control_input_mode">Input mode</string>
@@ -70,6 +80,8 @@
     <string name="telemetry_stale">Stale</string>
     <string name="telemetry_no_data">No data</string>
     <string name="telemetry_waiting">Waiting for telemetry…</string>
+    <string name="telemetry_never_updated">No telemetry received yet</string>
+    <string name="telemetry_age_seconds">Updated %1$.1f s ago</string>
     <string name="telemetry_temperature">Temperature</string>
     <string name="telemetry_humidity">Humidity</string>
     <string name="telemetry_light">Light</string>

@@ -6,10 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import com.example.rover_control.ui.theme.Background
+import com.example.rover_control.ui.navigation.RoverNavHost
 import com.example.rover_control.ui.theme.RoverControlTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,12 +18,7 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             RoverControlTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = Background
-                ) {
-                    // Navigation host is wired in Phase 4.
-                }
+                RoverNavHost()
             }
         }
     }

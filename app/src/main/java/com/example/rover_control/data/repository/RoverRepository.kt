@@ -59,6 +59,9 @@ class RoverRepository(
     private val _demoMode = MutableStateFlow(false)
     val demoMode: StateFlow<Boolean> = _demoMode.asStateFlow()
 
+    private val _emergencyStopped = MutableStateFlow(false)
+    val emergencyStopped: StateFlow<Boolean> = _emergencyStopped.asStateFlow()
+
     @Volatile
     private var socket: BluetoothSocket? = null
 
@@ -89,6 +92,7 @@ class RoverRepository(
     ) {
         stopDemoInternal()
         _demoMode.value = false
+        _emergencyStopped.value = false
         manualDisconnect = false
         currentSpeed = initialSpeed.coerceIn(0, 255)
         resetTransport()
@@ -107,6 +111,7 @@ class RoverRepository(
         manualDisconnect = true
         stopDemoInternal()
         _demoMode.value = false
+        _emergencyStopped.value = false
         resetTransport()
         _connectionState.value = ConnectionState.Disconnected()
     }
@@ -123,6 +128,7 @@ class RoverRepository(
             stopDemoInternal()
             resetTransport()
             _demoMode.value = true
+            _emergencyStopped.value = false
             resetTelemetry()
             _connectionState.value = ConnectionState.Connected(DEMO_DEVICE_NAME, isDemo = true)
             demoJob = scope.launch {
@@ -134,8 +140,27 @@ class RoverRepository(
         } else {
             stopDemoInternal()
             _demoMode.value = false
+            _emergencyStopped.value = false
             _connectionState.value = ConnectionState.Disconnected()
         }
+    }
+
+    /**
+     * Hard stop: sends `X\n` and turns the headlights off. Movement stays
+     * blocked until [rearm] is called (Implementation_plan.md §6.3).
+     */
+    fun emergencyStop() {
+        _emergencyStopped.value = true
+        sendCommand(RoverCommand.EmergencyStop)
+        sendCommand(RoverCommand.Headlights(false))
+        Log.d(TAG, "Emergency stop engaged")
+    }
+
+    /** Sends `S\n` so the firmware leaves its stopped state, then re-enables input. */
+    fun rearm() {
+        _emergencyStopped.value = false
+        sendCommand(RoverCommand.Stop)
+        Log.d(TAG, "Rearmed")
     }
 
     fun sendCommand(command: RoverCommand) {
@@ -147,6 +172,10 @@ class RoverRepository(
         }
         if (state.isDemo) {
             Log.d(TAG, "DEMO command $encoded")
+            return
+        }
+        if (_emergencyStopped.value && command.isMovementCommand()) {
+            Log.d(TAG, "Ignoring movement command $encoded: emergency stop engaged")
             return
         }
         val queue = writerChannel
@@ -287,6 +316,15 @@ class RoverRepository(
     private fun stopDemoInternal() {
         demoJob?.cancel()
         demoJob = null
+    }
+
+    private fun RoverCommand.isMovementCommand(): Boolean = when (this) {
+        RoverCommand.Forward,
+        RoverCommand.Backward,
+        RoverCommand.Left,
+        RoverCommand.Right -> true
+
+        else -> false
     }
 
     private companion object {
