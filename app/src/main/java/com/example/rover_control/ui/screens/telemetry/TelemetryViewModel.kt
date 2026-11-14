@@ -11,6 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -19,7 +20,8 @@ data class TelemetryUiState(
     val hasReceivedTelemetry: Boolean = false,
     val ageMillis: Long? = null,
     val isStale: Boolean = true,
-    val connectionState: ConnectionState = ConnectionState.Disconnected()
+    val connectionState: ConnectionState = ConnectionState.Disconnected(),
+    val isStopped: Boolean = false
 )
 
 class TelemetryViewModel(application: Application) : AndroidViewModel(application) {
@@ -31,6 +33,11 @@ class TelemetryViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         viewModelScope.launch {
+            repository.emergencyStopped.collect { stopped ->
+                _uiState.update { it.copy(isStopped = stopped) }
+            }
+        }
+        viewModelScope.launch {
             while (isActive) {
                 val lastAt = repository.lastTelemetryAt.value
                 val age = lastAt?.let { SystemClock.elapsedRealtime() - it }
@@ -39,7 +46,8 @@ class TelemetryViewModel(application: Application) : AndroidViewModel(applicatio
                     hasReceivedTelemetry = lastAt != null,
                     ageMillis = age,
                     isStale = age == null || age > STALE_AFTER_MS,
-                    connectionState = repository.connectionState.value
+                    connectionState = repository.connectionState.value,
+                    isStopped = repository.emergencyStopped.value
                 )
                 delay(TICK_MS)
             }
@@ -48,6 +56,10 @@ class TelemetryViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun emergencyStop() {
         repository.emergencyStop()
+    }
+
+    fun rearm() {
+        repository.rearm()
     }
 
     private companion object {

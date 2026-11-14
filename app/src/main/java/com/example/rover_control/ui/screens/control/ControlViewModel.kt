@@ -56,7 +56,13 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
                         settingsRepository.setHeadlightsOn(false)
                     }
                 } else {
-                    _uiState.update { it.copy(isStopped = false) }
+                    if (_uiState.value.isStopped) {
+                        _uiState.update {
+                            it.copy(isStopped = false, speedPercent = speedBeforeStop)
+                        }
+                    } else {
+                        _uiState.update { it.copy(isStopped = false) }
+                    }
                 }
             }
         }
@@ -121,13 +127,14 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun rearm() {
-        repository.rearm()
         val restore = speedBeforeStop
+        val speedByte = speedPercentToByte(restore)
+        repository.rearm(speedByte)
         _uiState.update { it.copy(isStopped = false, speedPercent = restore) }
 
         speedJob?.cancel()
-        speedJob = viewModelScope.launch {
-            persistAndSendSpeed(restore)
+        viewModelScope.launch {
+            settingsRepository.setLastSpeed(speedByte)
         }
     }
 
@@ -140,7 +147,6 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
     override fun onCleared() {
         speedJob?.cancel()
         repository.sendCommand(RoverCommand.Stop)
-        super.onCleared()
     }
 
     private companion object {

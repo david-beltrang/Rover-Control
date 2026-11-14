@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">Rover Control</string>
-    <string name="app_subtitle">Monitor Ambiental</string>
+    <string name="app_subtitle">Environmental Monitor</string>
 
     <!-- Navigation -->
     <string name="nav_control">Control</string>
@@ -102,7 +102,6 @@
     <string name="unit_percent">%</string>
     <string name="unit_centimeters">cm</string>
     <string name="unit_degrees">°</string>
-    <string name="unit_raw_adc">ADC</string>
     <string name="value_placeholder">—</string>
 
     <!-- Common -->

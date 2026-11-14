@@ -72,6 +72,7 @@ import com.example.rover_control.ui.theme.PrimaryCyan
 import com.example.rover_control.ui.theme.SuccessGreen
 import com.example.rover_control.ui.theme.WarningAmber
 import com.example.rover_control.util.requiredBluetoothPermissions
+import kotlinx.coroutines.delay
 
 @Composable
 fun ConnectionScreen(
@@ -117,16 +118,17 @@ fun ConnectionScreen(
         }
     }
 
-    LaunchedEffect(uiState.errorMessage, uiState.errorResId) {
-        val errorResId = uiState.errorResId
-        val errorMessage = uiState.errorMessage
-        val message = when {
-            errorResId != null -> context.getString(errorResId)
-            errorMessage != null -> context.getString(R.string.connection_failed, errorMessage)
-            else -> null
-        }
-        if (message != null) {
-            snackbarHostState.showSnackbar(message)
+    val errorResId = uiState.errorResId
+    val errorMessage = uiState.errorMessage
+    val errorText = when {
+        errorResId != null -> stringResource(errorResId)
+        errorMessage != null ->
+            stringResource(R.string.connection_failed, errorMessage)
+        else -> null
+    }
+    LaunchedEffect(errorText) {
+        if (errorText != null) {
+            snackbarHostState.showSnackbar(errorText)
             viewModel.consumeError()
         }
     }
@@ -134,7 +136,12 @@ fun ConnectionScreen(
     var wasConnected by remember { mutableStateOf(uiState.connectionState.isConnected) }
     LaunchedEffect(uiState.connectionState) {
         val connected = uiState.connectionState.isConnected
-        if (connected && !wasConnected) onConnected()
+        if (connected && !wasConnected) {
+            // Let the tap that started the connection finish before swapping
+            // screens, otherwise its release can land on the Control screen.
+            delay(350)
+            if (uiState.connectionState.isConnected) onConnected()
+        }
         wasConnected = connected
     }
 
@@ -168,7 +175,10 @@ fun ConnectionScreen(
             StatusCard(
                 state = uiState.connectionState,
                 onDisconnect = viewModel::disconnect,
-                onContinue = onConnected
+                onContinue = onConnected,
+                onReconnect = uiState.pairedDevices
+                    .firstOrNull { it.address == uiState.lastDeviceMac }
+                    ?.let { device -> { viewModel.connect(device) } }
             )
 
             if (!uiState.isBluetoothSupported) {
@@ -182,17 +192,21 @@ fun ConnectionScreen(
                 }
             } else if (!uiState.hasBluetoothPermission) {
                 Spacer(Modifier.height(12.dp))
-                Banner(color = ErrorRed) {
+                BannerBlock(color = ErrorRed) {
                     Text(
                         text = stringResource(R.string.connection_permission_denied),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.weight(1f)
+                        style = MaterialTheme.typography.bodyMedium
                     )
-                    TextButton(onClick = requestPermissions) {
-                        Text(stringResource(R.string.connection_grant_permission))
-                    }
-                    TextButton(onClick = openAppSettings) {
-                        Text(stringResource(R.string.connection_open_settings))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(onClick = requestPermissions) {
+                            Text(stringResource(R.string.connection_grant_permission))
+                        }
+                        TextButton(onClick = openAppSettings) {
+                            Text(stringResource(R.string.connection_open_settings))
+                        }
                     }
                 }
             } else if (!uiState.isBluetoothEnabled) {
@@ -318,7 +332,8 @@ fun ConnectionScreen(
 private fun StatusCard(
     state: ConnectionState,
     onDisconnect: () -> Unit,
-    onContinue: () -> Unit
+    onContinue: () -> Unit,
+    onReconnect: (() -> Unit)?
 ) {
     val (text, color) = when (state) {
         is ConnectionState.Connected -> if (state.isDemo) {
@@ -368,6 +383,11 @@ private fun StatusCard(
                     Button(onClick = onContinue) {
                         Text(stringResource(R.string.connection_continue))
                     }
+                }
+            } else if (state is ConnectionState.Disconnected && onReconnect != null) {
+                Spacer(Modifier.height(12.dp))
+                Button(onClick = onReconnect) {
+                    Text(stringResource(R.string.connection_reconnect))
                 }
             }
         }
@@ -470,6 +490,26 @@ private fun DemoCard(
             }
             Switch(checked = checked, onCheckedChange = onCheckedChange)
         }
+    }
+}
+
+@Composable
+private fun BannerBlock(
+    color: androidx.compose.ui.graphics.Color,
+    content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        color = color.copy(alpha = 0.12f),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.4f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            content = content
+        )
     }
 }
 

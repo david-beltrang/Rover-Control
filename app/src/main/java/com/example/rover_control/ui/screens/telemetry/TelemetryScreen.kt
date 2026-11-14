@@ -35,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rover_control.R
 import com.example.rover_control.data.protocol.Telemetry
 import com.example.rover_control.ui.components.ConnectionStatusPill
+import com.example.rover_control.ui.components.EmergencyStopBanner
 import com.example.rover_control.ui.components.EmergencyStopFab
 import com.example.rover_control.ui.components.StaleBadge
 import com.example.rover_control.ui.components.TelemetryCard
@@ -85,6 +86,13 @@ fun TelemetryScreen(
                 .padding(horizontal = 20.dp)
                 .padding(top = 8.dp)
         ) {
+            if (uiState.isStopped) {
+                EmergencyStopBanner(
+                    onRearm = viewModel::rearm,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            }
+
             UpdateIndicator(
                 hasReceivedTelemetry = uiState.hasReceivedTelemetry,
                 ageMillis = uiState.ageMillis,
@@ -239,7 +247,7 @@ private fun LightCard(
         icon = Icons.Filled.WbSunny,
         title = stringResource(R.string.telemetry_light),
         value = value?.toString() ?: stringResource(R.string.value_placeholder),
-        unit = stringResource(R.string.unit_raw_adc),
+        unit = null,
         hint = hint,
         hintColor = color,
         stale = stale,

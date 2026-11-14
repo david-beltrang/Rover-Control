@@ -146,21 +146,27 @@ class RoverRepository(
     }
 
     /**
-     * Hard stop: sends `X\n` and turns the headlights off. Movement stays
-     * blocked until [rearm] is called (Implementation_plan.md §6.3).
+     * Hard stop: sends `S\n`, latches `X\n` and turns the headlights off.
+     * Movement stays blocked until [rearm] is called (Implementation_plan.md §6.3).
      */
     fun emergencyStop() {
         _emergencyStopped.value = true
+        // "S" also stops firmware that predates the "X" command, while "X"
+        // latches the stopped state on updated firmware. Send "S" first so it
+        // cannot accidentally re-arm an "X" latch.
+        sendCommand(RoverCommand.Stop)
         sendCommand(RoverCommand.EmergencyStop)
         sendCommand(RoverCommand.Headlights(false))
         Log.d(TAG, "Emergency stop engaged")
     }
 
-    /** Sends `S\n` so the firmware leaves its stopped state, then re-enables input. */
-    fun rearm() {
+    /** Sends `S\n` so the firmware leaves its stopped state, restores the speed and re-enables input. */
+    fun rearm(speed: Int? = null) {
+        if (speed != null) currentSpeed = speed.coerceIn(0, 255)
         _emergencyStopped.value = false
         sendCommand(RoverCommand.Stop)
-        Log.d(TAG, "Rearmed")
+        sendCommand(RoverCommand.SetSpeed(currentSpeed))
+        Log.d(TAG, "Rearmed at speed $currentSpeed")
     }
 
     fun sendCommand(command: RoverCommand) {

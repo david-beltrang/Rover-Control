@@ -1,6 +1,5 @@
 package com.example.rover_control.ui.screens.control
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,10 +20,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -36,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -46,13 +41,13 @@ import com.example.rover_control.ui.components.ConnectionStatusPill
 import com.example.rover_control.ui.components.Direction
 import com.example.rover_control.ui.components.DirectionLabel
 import com.example.rover_control.ui.components.DirectionalPad
+import com.example.rover_control.ui.components.EmergencyStopBanner
 import com.example.rover_control.ui.components.EmergencyStopFab
 import com.example.rover_control.ui.components.InputModeSheet
 import com.example.rover_control.ui.components.Joystick
 import com.example.rover_control.ui.components.SpeedSlider
 import com.example.rover_control.ui.components.toRoverCommand
 import com.example.rover_control.ui.theme.Background
-import com.example.rover_control.ui.theme.ErrorRed
 import com.example.rover_control.ui.theme.PrimaryCyan
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,7 +96,7 @@ fun ControlScreen(
                 .padding(horizontal = 20.dp)
         ) {
             if (uiState.isStopped) {
-                StoppedBanner(
+                EmergencyStopBanner(
                     onRearm = {
                         activeDirection = null
                         viewModel.rearm()
@@ -134,7 +129,7 @@ fun ControlScreen(
                             enabled = !uiState.isStopped,
                             onDirectionChange = handleDirectionChange,
                             onRelease = handleRelease,
-                            modifier = Modifier.fillMaxWidth(0.78f)
+                            modifier = Modifier.fillMaxWidth(0.68f)
                         )
 
                         InputMode.DPAD -> DirectionalPad(
@@ -186,7 +181,7 @@ fun ControlScreen(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(104.dp))
         }
     }
 
@@ -199,52 +194,5 @@ fun ControlScreen(
             },
             onDismiss = { showInputModeSheet = false }
         )
-    }
-}
-
-@Composable
-private fun StoppedBanner(
-    onRearm: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        color = ErrorRed.copy(alpha = 0.12f),
-        border = BorderStroke(1.dp, ErrorRed.copy(alpha = 0.5f))
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Warning,
-                contentDescription = null,
-                tint = ErrorRed
-            )
-            Spacer(Modifier.width(8.dp))
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.control_stopped),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = ErrorRed,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = stringResource(R.string.control_stopped_message),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            TextButton(onClick = onRearm) {
-                Text(
-                    text = stringResource(R.string.control_rearm),
-                    color = PrimaryCyan,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
     }
 }
