@@ -1,8 +1,9 @@
 # Rover Control
 
 Native Android app (Kotlin + Jetpack Compose) to drive an Arduino rover over
-**Bluetooth Classic SPP** and monitor its environmental telemetry. The UI is a
-portrait-only dark theme, designed for the Samsung Galaxy A57.
+**Bluetooth Classic SPP** and monitor its environmental telemetry. The Control
+screen is a landscape, immersive HUD; Connection and Telemetry stay portrait.
+The design targets the Samsung Galaxy A57.
 
 The app talks to an **HC-05/HC-06** module. It lists only devices already paired
 in Android settings; pairing itself happens in Android Bluetooth settings.
@@ -11,8 +12,8 @@ in Android settings; pairing itself happens in Android Bluetooth settings.
 
 - **Connection screen** with bonded-device list, connection status, automatic
   retry (once), manual reconnect and Demo Mode.
-- **Control screen** with a joystick or D-pad, speed slider (0–100 %), headlight
-  switch, input-mode bottom sheet and a global **E-STOP**.
+- **Control HUD** in immersive landscape with PAD/STICK steering, a vertical
+  speed slider (0–100 %), engine arm, turbo, brake, headlights and **E-STOP**.
 - **Telemetry screen** with five live cards (temperature, humidity, light,
   distance, inclination), freshness indicator and per-card stale badge.
 - **Demo Mode** that simulates telemetry and accepts input with no Bluetooth
@@ -88,20 +89,31 @@ automatically. Use **Reconnect** to retry manually.
 
 ### Control screen
 
-- **Input mode**: gear icon → bottom sheet → Joystick or D-pad. The choice is
-  persisted across launches.
-- **Joystick**: drag to move; a 15 % deadzone prevents drift. Commands are sent
-  only when the direction changes, and `S` is sent when released or centered.
-- **D-pad**: press a direction to move; release or press the center button to
-  stop.
-- **Speed**: 0–100 % in the UI, mapped to the firmware's 0–255 (`V` command).
-  The default is 60 % (`V153`). Slider changes are debounced by ~200 ms and the
-  value is restored on the next launch.
-- **Headlights**: switches the white LED on/off (`W1` / `W0`). The state is
-  re-sent after connecting.
-- **E-STOP** (red FAB, present on Control and Telemetry): sends `S`, `X` and
-  `W0`, dims/locks movement and speed/light input, and shows a **STOPPED**
-  banner. **Rearm** sends `S` and restores the speed from before the stop.
+The Control screen rotates to `sensorLandscape` and hides the system bars. The
+Connection and Telemetry screens return to portrait with the shared bottom bar.
+The HUD bottom pill switches between **CONTROLS** and **TELEMETRY**, and the
+connection pill in the header opens the Connection screen.
+
+- **PAD / STICK**: segmented steering-mode switch. PAD uses five touch targets
+  with a central stop; STICK is a drag joystick with a 15 % deadzone. Commands
+  are sent only when the direction changes, and `S` is sent when released or
+  centered. The choice is persisted across launches.
+- **Speed**: vertical 0–100 % slider mapped to the firmware's 0–255 (`V`
+  command). The default is 60 % (`V153`). Changes are debounced by ~200 ms and
+  the value is restored on the next launch.
+- **ENGINE**: app-level arm/disarm state. It is ON after launch so the controls
+  work immediately. Turning it off sends `S` and disables drive controls;
+  turning it on re-sends the selected speed. The firmware has no engine command.
+- **LIGHTS**: switches the white LED on/off (`W1` / `W0`). The state is re-sent
+  after connecting.
+- **TURBO**: temporarily switches to 100 % (`V255`); toggling it off restores
+  the previous speed. It is disabled while stopped or with the engine off.
+- **BRAKE**: immediately sets speed to 0 (`V0`) and sends `S`. It does not latch
+  the E-STOP.
+- **E-STOP** (red pill in the HUD header; the telemetry screen keeps its FAB):
+  sends `S`, `X` and `W0`, dims/locks movement and speed/light input, and shows
+  a **STOPPED** banner. **Rearm** sends `S` and restores the speed from before
+  the stop.
 
 ### Telemetry screen
 
@@ -141,6 +153,10 @@ Commands are fire-and-forget and only sent while connected.
 The app sends the current speed and headlight state immediately after a
 successful connection (`V…`, then `W0`/`W1`). Movement is edge-triggered: it is
 never sent in a periodic loop.
+
+HUD-only controls map onto the existing protocol: engine off sends `S`, engine
+on re-sends `V`; turbo sends `V255` and restores the previous `V`; brake sends
+`V0` followed by `S`. No new firmware commands are required.
 
 ### Rover → app (JSON lines, 2 Hz)
 
@@ -221,14 +237,19 @@ distribution.
 
 ## Verification status
 
-- `assembleDebug` and `testDebugUnitTest` pass locally (JVM unit tests cover
-  command encoding and telemetry parsing, including malformed/missing fields).
+- `assembleDebug`, `testDebugUnitTest` and `lintDebug` pass locally (JVM unit
+  tests cover command encoding and telemetry parsing, including
+  malformed/missing fields).
+- Emulator smoke test passed for the new HUD: landscape/immersive Control,
+  portrait Connection/Telemetry, HUD navigation, PAD/STICK switching, vertical
+  speed slider, engine arm/disarm, headlights, turbo, brake and E-STOP/rearm.
 - The full manual checklist (T01–T24: permissions, pairing, driving, speed
   persistence, headlights, E-STOP/rearm, stale telemetry, Demo Mode, orientation,
   5-minute soak, reconnect) requires the physical rover and HC-05. It has **not**
   been executed in this build environment because no hardware is available.
   The complete checklist is in [`Implementation_plan.md`](Implementation_plan.md)
-  §11.1.
+  §11.1. Orientation is now intentionally route-based: Control is landscape,
+  Connection and Telemetry are portrait.
 - There is no firmware source in this repository; the required firmware changes
   are listed above.
 
@@ -258,8 +279,8 @@ app/src/main/
 │   │   ├── repository/     # RoverRepository (socket, demo, E-STOP)
 │   │   └── settings/       # DataStore preferences
 │   ├── ui/
-│   │   ├── components/     # joystick, D-pad, cards, status pill, FAB
-│   │   ├── navigation/     # bottom-nav NavHost
+│   │   ├── components/     # control HUD, joystick, D-pad, cards, FAB
+│   │   ├── navigation/     # NavHost + per-route orientation/immersive mode
 │   │   ├── screens/        # connection, control, telemetry + ViewModels
 │   │   └── theme/          # dark palette per spec
 │   └── util/

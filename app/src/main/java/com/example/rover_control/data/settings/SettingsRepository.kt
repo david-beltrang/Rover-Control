@@ -22,12 +22,12 @@ enum class InputMode(val storageValue: String) {
 
     companion object {
         fun fromStorage(value: String?): InputMode =
-            entries.firstOrNull { it.storageValue == value } ?: JOYSTICK
+            entries.firstOrNull { it.storageValue == value } ?: DPAD
     }
 }
 
 data class RoverSettings(
-    val inputMode: InputMode = InputMode.JOYSTICK,
+    val inputMode: InputMode = InputMode.DPAD,
     val lastSpeed: Int = DEFAULT_SPEED,
     val headlightsOn: Boolean = false,
     val lastDeviceMac: String? = null

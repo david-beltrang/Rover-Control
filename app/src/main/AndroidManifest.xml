@@ -28,7 +28,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.RoverControl"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

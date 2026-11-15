@@ -50,14 +50,32 @@
 
     <!-- Control screen -->
     <string name="control_title">Control</string>
+    <string name="control_hud_title">ROVER CAR CONTROL SYSTEM</string>
     <string name="control_speed">Speed</string>
     <string name="control_speed_value">Speed %1$d%%</string>
+    <string name="control_speed_percent">%1$d%%</string>
+    <string name="control_speed_title">SPEED</string>
+    <string name="control_control_speed">CONTROL SPEED</string>
+    <string name="control_direction_title">STEERING</string>
     <string name="control_headlights">Headlights</string>
+    <string name="control_lights_on">LIGHTS ON</string>
+    <string name="control_lights_off">LIGHTS OFF</string>
+    <string name="control_lights_label">LIGHTS</string>
     <string name="control_reset_speed">Reset Speed</string>
     <string name="control_input_mode">Input mode</string>
     <string name="control_input_joystick">Joystick</string>
     <string name="control_input_dpad">D-pad</string>
+    <string name="control_mode_pad">PAD</string>
+    <string name="control_mode_stick">STICK</string>
+    <string name="control_engine">ENGINE</string>
+    <string name="control_engine_start">START</string>
+    <string name="control_engine_on">ON</string>
+    <string name="control_turbo">TURBO</string>
+    <string name="control_brake">BRAKE</string>
+    <string name="control_nav_controls">CONTROLS</string>
+    <string name="control_nav_telemetry">TELEMETRY</string>
     <string name="control_stopped">STOPPED</string>
+    <string name="control_stopped_hint">Movement locked</string>
     <string name="control_rearm">Rearm</string>
     <string name="control_emergency_stop">Emergency stop</string>
     <string name="control_estop">E-STOP</string>
@@ -72,6 +90,8 @@
     <string name="control_direction_right">RIGHT</string>
     <string name="control_settings">Control settings</string>
     <string name="control_stopped_message">Emergency stop engaged. Movement is disabled until you rearm.</string>
+    <string name="content_description_open_connection">Open connection screen</string>
+    <string name="content_description_speed_slider">Speed</string>
 
     <!-- Telemetry screen -->
     <string name="telemetry_title">Telemetry</string>
