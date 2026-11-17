@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.ReportProblem
@@ -62,6 +63,7 @@ import com.example.rover_control.data.settings.InputMode
 import com.example.rover_control.ui.components.ConnectionStatusPill
 import com.example.rover_control.ui.components.Direction
 import com.example.rover_control.ui.components.HudBottomTabBar
+import com.example.rover_control.ui.components.HudTab
 import com.example.rover_control.ui.components.HudCardTitle
 import com.example.rover_control.ui.components.HudCircleButton
 import com.example.rover_control.ui.components.HudDirectionalPad
@@ -225,7 +227,10 @@ fun ControlScreen(
                 contentAlignment = Alignment.Center
             ) {
                 HudBottomTabBar(
+                    selectedTab = HudTab.CONTROLS,
+                    controlsEnabled = true,
                     telemetryEnabled = connected,
+                    onControlsClick = {},
                     onTelemetryClick = {
                         hapticTap()
                         onOpenTelemetry()
@@ -245,21 +250,44 @@ private fun ControlHeader(
     onEmergencyStop: () -> Unit
 ) {
     val openConnectionLabel = stringResource(R.string.content_description_open_connection)
+    val ledColor = when (connectionState) {
+        is ConnectionState.Connected -> if (connectionState.isDemo) com.example.rover_control.ui.theme.WarningAmber else com.example.rover_control.ui.theme.SuccessGreen
+        is ConnectionState.Connecting -> com.example.rover_control.ui.theme.WarningAmber
+        is ConnectionState.Disconnected -> ErrorRed
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(34.dp),
         contentAlignment = Alignment.Center
     ) {
-        ConnectionStatusPill(
-            state = connectionState,
+        Row(
             modifier = Modifier
                 .align(Alignment.CenterStart)
+                .clip(CircleShape)
+                .background(com.example.rover_control.ui.theme.HudSurfaceControl)
+                .border(1.dp, Color.White.copy(alpha = 0.08f), CircleShape)
                 .clickable(
                     onClickLabel = openConnectionLabel,
                     onClick = onOpenConnection
                 )
-        )
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.nav_back),
+                tint = HudTextPrimary,
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(Modifier.width(6.dp))
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(ledColor, CircleShape)
+            )
+        }
 
         Text(
             text = stringResource(R.string.control_hud_title),
@@ -270,7 +298,7 @@ private fun ControlHeader(
             letterSpacing = 2.1.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 104.dp)
+            modifier = Modifier.padding(horizontal = 72.dp)
         )
 
         Row(
@@ -474,7 +502,7 @@ private fun SpeedPanel(
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         HudCircleButton(
@@ -495,14 +523,14 @@ private fun SpeedPanel(
                         )
                         HudCircleButton(
                             icon = Icons.Filled.WbSunny,
-                            title = stringResource(
+                            title = stringResource(R.string.control_lights_label),
+                            subtitle = stringResource(
                                 if (headlightsOn) {
-                                    R.string.control_lights_on
+                                    R.string.control_engine_on
                                 } else {
-                                    R.string.control_lights_off
+                                    R.string.control_off
                                 }
                             ),
-                            subtitle = stringResource(R.string.control_lights_label),
                             active = headlightsOn,
                             dashedBorder = false,
                             enabled = lightsEnabled,

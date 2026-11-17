@@ -14,8 +14,9 @@ in Android settings; pairing itself happens in Android Bluetooth settings.
   retry (once), manual reconnect and Demo Mode.
 - **Control HUD** in immersive landscape with PAD/STICK steering, a vertical
   speed slider (0–100 %), engine arm, turbo, brake, headlights and **E-STOP**.
-- **Telemetry screen** with five live cards (temperature, humidity, light,
-  distance, inclination), freshness indicator and per-card stale badge.
+- **Telemetry HUD** in portrait with temperature/humidity cards, light,
+  distance and inclination panels, a live freshness indicator and a stale
+  state that dims the readings.
 - **Demo Mode** that simulates telemetry and accepts input with no Bluetooth
   hardware, so the app can be presented even if the rover fails.
 - All UI text is in English and lives in `strings.xml`.
@@ -89,10 +90,10 @@ automatically. Use **Reconnect** to retry manually.
 
 ### Control screen
 
-The Control screen rotates to `sensorLandscape` and hides the system bars. The
-Connection and Telemetry screens return to portrait with the shared bottom bar.
-The HUD bottom pill switches between **CONTROLS** and **TELEMETRY**, and the
-connection pill in the header opens the Connection screen.
+The Control screen rotates to `sensorLandscape` and hides the system bars.
+Connection and Telemetry return to portrait. Control and Telemetry each own a
+floating HUD bottom pill that switches between **CONTROLS** and **TELEMETRY**;
+the connection pill in either top bar opens the Connection screen.
 
 - **PAD / STICK**: segmented steering-mode switch. PAD uses five touch targets
   with a central stop; STICK is a drag joystick with a 15 % deadzone. Commands
@@ -110,27 +111,30 @@ connection pill in the header opens the Connection screen.
   the previous speed. It is disabled while stopped or with the engine off.
 - **BRAKE**: immediately sets speed to 0 (`V0`) and sends `S`. It does not latch
   the E-STOP.
-- **E-STOP** (red pill in the HUD header; the telemetry screen keeps its FAB):
+- **E-STOP** (red pill in the Control header and in the Telemetry top bar):
   sends `S`, `X` and `W0`, dims/locks movement and speed/light input, and shows
   a **STOPPED** banner. **Rearm** sends `S` and restores the speed from before
   the stop.
 
 ### Telemetry screen
 
-Telemetry is read as JSON lines and refreshed at 2 Hz. The header shows
-`Updated X.X s ago`; if no valid line arrives for more than **3 seconds**, the
-cards dim and show a **No data** badge. Missing fields keep their last known
-values instead of blanking the UI.
+Telemetry is read as JSON lines and refreshed at 2 Hz. A strip under the top
+bar shows `Updated X.X s ago`. If no valid line arrives for more than **3
+seconds**, the readings dim and a **STALE** badge appears. Missing fields keep
+their last known values instead of blanking the UI.
 
-| Card | Unit | Alert |
+| Panel | Unit | Display / thresholds |
 |---|---|---|
-| Temperature | °C | **Hot** (red) above 40 °C |
-| Humidity | % | **Humid** (blue) above 80 % |
-| Light | raw ADC | **Dark** < 200, **Dim** 200–699, **Bright** ≥ 700 |
-| Distance | cm | **Danger** (red) < 20 cm, **Near** (amber) < 50 cm; `0` means no obstacle and is shown as `—` |
-| Inclination | ° | **Tilt!** (red) above 25° |
+| Temperature | °C | **OPTIMAL** 20–35 °C; **LOW** below 20 °C; **HIGH** above 35 °C |
+| Humidity | % | **NORMAL** 30–70 %; **DRY** below 30 %; **HUMID** above 70 % |
+| Light | raw ADC | **DARK** < 200, **DIM** 200–699, **BRIGHT** ≥ 700; raw value and % of the 0–1023 range |
+| Distance | cm | **DANGER** < 20 cm, **CAUTION** < 30 cm, **ACTIVE** ≥ 30 cm; `0` or missing means no data |
+| Inclination | ° | **STABLE** ±15°, **CAUTION** ±15–25°, **TILTED** beyond ±25°; radar bubble, pitch/roll and derived slope |
 
-There are no graphs or history; the MVP is value cards only.
+The rover protocol exposes one inclination value. The app displays it as
+**PITCH**, keeps **ROLL** at 0° until firmware reports a second axis, and
+derives **SLOPE** from the angle. There are no graphs or history; the MVP is
+live values only.
 
 ## Protocol
 
@@ -175,30 +179,44 @@ on re-sends `V`; turbo sends `V255` and restores the previous `V`; brake sends
 The parser tolerates unknown fields and ignores malformed lines. Lines should
 be newline-terminated; telemetry is expected every 500 ms.
 
-## Firmware compatibility
+## Companion Arduino firmware
 
-> **The current rover firmware may only support `F`, `B`, `L`, `R` and `S`.**
-> The app still builds and runs, but speed (`V`), headlights (`W`) and the hard
-> E-STOP (`X`) require a firmware update. If they are unavailable, movement
-> still works at the firmware's fixed speed and headlights remain off.
+The repository includes a ready-to-upload sketch at
+[`app/codigo_Arduino.ino`](app/codigo_Arduino.ino) for the original four-motor
+rover with an **Adafruit Motor Shield v1** (`AFMotor`) and an **HC-05/HC-06**
+module on `SoftwareSerial(9, 10)`.
 
-The firmware should:
+Upload it with the Arduino IDE, pair the HC-05 in Android Bluetooth settings,
+connect from the app, and the Control screen works without further firmware
+changes:
 
-1. Read newline-terminated commands and `trim()` each line, so the `\n`
-   terminator is tolerated.
-2. Recognize `F/B/L/R/S` plus `V<0-255>`, `W0/W1` and `X`.
-3. On `X`: immediately set both motor PWM channels to 0 and enter a latched
-   `stopped` state that ignores movement commands.
-4. On `S`: clear the latched E-STOP state (rearm). The app always sends `S` when
-   **Rearm** is pressed, then re-sends the previous speed with `V`.
-   The app also sends `S` immediately before `X` on E-STOP, so firmware that
-   only understands `S` still stops.
-5. Emit telemetry as one JSON object per line every 500 ms, without blocking the
-   control loop (use a `millis()` schedule, not `delay()` in the parser).
+- **Movements:** `F`, `B`, `L`, `R` move/hold until the next movement command;
+  releasing the d-pad or joystick sends `S`.
+- **Speed:** `V<0-255>` updates the speed immediately, including while moving.
+- **Turbo:** the app sends `V255` and restores the previous speed afterwards.
+- **Brake:** the app sends `V0` followed by `S`.
+- **E-STOP / rearm:** `X` stops and latches the rover; only `S` clears the latch
+  and rearms. The app sends `S` before `X` and again on **Rearm**.
+- **Headlights:** `W0`/`W1` are accepted but do nothing by default. Uncomment
+  and set `PIN_LUCES` in the sketch if a relay, MOSFET or LED is wired.
+- **Newline handling:** commands are parsed line-by-line, so the app's `\n`
+  terminator is tolerated and several commands can arrive together.
 
-Recommended E-STOP semantics: **`X` latches stopped; `S` rearms.** Do not
-implement rearm only as "X toggles", because the app never sends X for rearm and
-would stay stopped.
+The sketch does **not** emit telemetry because no temperature, humidity, light,
+distance or inclination sensors are defined in the original hardware. The
+Telemetry screen will therefore show **No telemetry received yet / STALE**;
+controls still work normally. To enable telemetry, add the sensors and emit one
+newline-terminated JSON object every 500 ms from `loop()` without using
+`delay()`:
+
+```json
+{"t":25.3,"h":60.2,"l":412,"d":35,"i":12}
+```
+
+The parser tolerates unknown fields and missing fields keep their last known
+values. If you use different firmware, it must implement the same command and
+telemetry contract as the app; the essentials are newline-terminated commands,
+`X` latching the stopped state and `S` rearming it.
 
 ## Demo Mode
 
@@ -209,7 +227,8 @@ Enable **Demo Mode (no hardware)** on the Connection screen. The app:
 - emits synthetic telemetry every 500 ms;
 - accepts every control input, logging commands to Logcat instead of sending
   them;
-- shows an amber **DEMO** pill so the state is never confused with a real link.
+- shows a **DEMO** / **DEMO MODE** label so the state is never confused with a
+  real link.
 
 Demo Mode is in-memory only, so it resets to off when the app process is
 restarted or force-stopped. It is ideal for UI rehearsal at the demo table.
@@ -240,18 +259,23 @@ distribution.
 - `assembleDebug`, `testDebugUnitTest` and `lintDebug` pass locally (JVM unit
   tests cover command encoding and telemetry parsing, including
   malformed/missing fields).
-- Emulator smoke test passed for the new HUD: landscape/immersive Control,
-  portrait Connection/Telemetry, HUD navigation, PAD/STICK switching, vertical
-  speed slider, engine arm/disarm, headlights, turbo, brake and E-STOP/rearm.
+- Emulator smoke test passed for the new HUDs: landscape/immersive Control,
+  portrait Telemetry, HUD navigation, PAD/STICK switching, vertical speed
+  slider, engine arm/disarm, headlights, turbo, brake, E-STOP/rearm, stale
+  state and telemetry scrolling.
+- The companion firmware command parser was host-tested with stubbed motors for
+  `F/B/L/R/S/V/X`, multiple commands per read, speed clamping, movement while
+  moving, brake and E-STOP/rearm. It still needs an upload test on the physical
+  Arduino and Motor Shield.
 - The full manual checklist (T01–T24: permissions, pairing, driving, speed
   persistence, headlights, E-STOP/rearm, stale telemetry, Demo Mode, orientation,
   5-minute soak, reconnect) requires the physical rover and HC-05. It has **not**
   been executed in this build environment because no hardware is available.
   The complete checklist is in [`Implementation_plan.md`](Implementation_plan.md)
-  §11.1. Orientation is now intentionally route-based: Control is landscape,
+  §11.1. Orientation is intentionally route-based: Control is landscape,
   Connection and Telemetry are portrait.
-- There is no firmware source in this repository; the required firmware changes
-  are listed above.
+- Telemetry emission is still a firmware-side optional feature; the companion
+  sketch has no sensor definitions.
 
 ## Troubleshooting
 
@@ -260,31 +284,34 @@ distribution.
 | "No paired devices" | Pair the HC-05 in Android Bluetooth settings, then tap **Refresh**. |
 | "Bluetooth permission denied" | Grant **Nearby devices** permission, or open app settings. |
 | "Connection failed" | Rover powered? HC-05 in range and not connected to another phone? Try **Reconnect**; the app already tried secure, insecure and channel-1 sockets. |
-| Connected but rover does not move | Confirm the firmware recognizes `F/B/L/R` and that the HC-05 is wired to the Arduino's serial pins. Check Logcat tag `RoverRepository`. |
-| Speed/headlights do nothing | Firmware needs `V`/`W` support. Legacy `F/B/L/R/S` firmware keeps a fixed speed and headlights off. |
-| Telemetry stays at "No telemetry received yet" | Firmware must emit newline-terminated JSON at 2 Hz. Check the Arduino Serial monitor and the module's TX/RX wiring. |
-| All cards show **No data** | No valid telemetry line for over 3 seconds: link lost, firmware stopped emitting, or lines are malformed. |
-| E-STOP does not stop the rover | Firmware must implement `X` (and/or `S`). On legacy firmware, cut rover power; then update the firmware. |
+| Connected but rover does not move | Confirm the sketch is uploaded and the HC-05 is wired to `SoftwareSerial(9, 10)`. If the rover was E-STOPped earlier, press **Rearm** (or power-cycle the Arduino) to clear the `X` latch. |
+| Speed/turbo/brake do nothing | Use the companion sketch or firmware that implements `V<0-255>`; turbo is `V255` and brake is `V0` + `S`. |
+| Headlights do nothing | The companion sketch accepts `W0`/`W1` but has no light pin by default. Set `PIN_LUCES` in the sketch and wire the light. |
+| Telemetry stays at "No telemetry received yet" | The companion movement sketch does not define sensors. Add sensors and emit newline-terminated JSON at 2 Hz, or check the module's TX/RX wiring. |
+| Readings turn **STALE** | No valid telemetry line for over 3 seconds: link lost, firmware stopped emitting, or lines are malformed. |
+| E-STOP does not stop the rover | Firmware must implement `X` (and/or `S`). On legacy firmware, cut rover power; then upload the companion sketch. |
 
 ## Project structure
 
 ```text
-app/src/main/
-├── AndroidManifest.xml
-├── java/com/example/rover_control/
-│   ├── MainActivity.kt / RoverApplication.kt
-│   ├── data/
-│   │   ├── bluetooth/      # adapter, bonded devices, socket fallback
-│   │   ├── protocol/       # commands, encoder, telemetry parser
-│   │   ├── repository/     # RoverRepository (socket, demo, E-STOP)
-│   │   └── settings/       # DataStore preferences
-│   ├── ui/
-│   │   ├── components/     # control HUD, joystick, D-pad, cards, FAB
-│   │   ├── navigation/     # NavHost + per-route orientation/immersive mode
-│   │   ├── screens/        # connection, control, telemetry + ViewModels
-│   │   └── theme/          # dark palette per spec
-│   └── util/
-└── res/values/             # English strings, colors, theme
+app/
+├── codigo_Arduino.ino      # companion firmware for the four-motor rover
+└── src/main/
+    ├── AndroidManifest.xml
+    ├── java/com/example/rover_control/
+    │   ├── MainActivity.kt / RoverApplication.kt
+    │   ├── data/
+    │   │   ├── bluetooth/      # adapter, bonded devices, socket fallback
+    │   │   ├── protocol/       # commands, encoder, telemetry parser
+    │   │   ├── repository/     # RoverRepository (socket, demo, E-STOP)
+    │   │   └── settings/       # DataStore preferences
+    │   ├── ui/
+    │   │   ├── components/     # control HUD, telemetry HUD, navigation pill
+    │   │   ├── navigation/     # NavHost + per-route orientation/immersive mode
+    │   │   ├── screens/        # connection, control, telemetry + ViewModels
+    │   │   └── theme/          # dark palette per spec
+    │   └── util/
+    └── res/values/             # English strings, colors, theme
 ```
 
 ## Scope

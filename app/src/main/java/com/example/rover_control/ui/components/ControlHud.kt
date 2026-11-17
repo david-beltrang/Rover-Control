@@ -804,6 +804,7 @@ internal fun HudCircleButton(
             }
         }
         Column(
+            modifier = Modifier.padding(horizontal = 2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -811,16 +812,16 @@ internal fun HudCircleButton(
                 imageVector = icon,
                 contentDescription = null,
                 tint = if (glow) HudAccentCyan else HudTextSecondary,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(15.dp)
             )
-            Spacer(Modifier.height(3.dp))
             Text(
                 text = title,
                 color = HudTextPrimary,
                 fontFamily = HudFont,
                 fontSize = 8.sp,
                 fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.4.sp,
+                letterSpacing = 0.sp,
+                lineHeight = 9.sp,
                 maxLines = 1
             )
             Text(
@@ -829,7 +830,8 @@ internal fun HudCircleButton(
                 fontFamily = HudFont,
                 fontSize = 7.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 0.4.sp,
+                letterSpacing = 0.sp,
+                lineHeight = 8.sp,
                 maxLines = 1
             )
         }
@@ -917,34 +919,42 @@ internal fun HudPillButton(
     }
 }
 
+internal enum class HudTab {
+    CONTROLS,
+    TELEMETRY
+}
+
 @Composable
 internal fun HudBottomTabBar(
+    selectedTab: HudTab,
+    controlsEnabled: Boolean,
     telemetryEnabled: Boolean,
+    onControlsClick: () -> Unit,
     onTelemetryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
-            .height(48.dp)
-            .shadow(8.dp, CircleShape, clip = false)
-            .clip(CircleShape)
+            .height(52.dp)
+            .shadow(8.dp, RoundedCornerShape(26.dp), clip = false)
+            .clip(RoundedCornerShape(26.dp))
             .background(HudSurface)
-            .border(1.dp, Color.White.copy(alpha = 0.04f), CircleShape)
+            .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(26.dp))
             .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        HudTab(
+        HudTabItem(
             icon = Icons.Filled.SportsEsports,
             label = stringResource(R.string.control_nav_controls),
-            selected = true,
-            enabled = true,
-            onClick = {},
+            selected = selectedTab == HudTab.CONTROLS,
+            enabled = controlsEnabled,
+            onClick = onControlsClick,
             modifier = Modifier.weight(1f)
         )
-        HudTab(
+        HudTabItem(
             icon = Icons.Filled.MonitorHeart,
             label = stringResource(R.string.control_nav_telemetry),
-            selected = false,
+            selected = selectedTab == HudTab.TELEMETRY,
             enabled = telemetryEnabled,
             onClick = onTelemetryClick,
             modifier = Modifier.weight(1f)
@@ -953,7 +963,7 @@ internal fun HudBottomTabBar(
 }
 
 @Composable
-private fun HudTab(
+private fun HudTabItem(
     icon: ImageVector,
     label: String,
     selected: Boolean,
@@ -966,14 +976,14 @@ private fun HudTab(
             .fillMaxHeight()
             .hudGlow(
                 color = if (selected) HudCyanGlow else Color.Transparent,
-                radius = 12.dp,
-                corner = 24.dp
+                radius = 14.dp,
+                corner = 22.dp
             )
-            .clip(CircleShape)
+            .clip(RoundedCornerShape(22.dp))
             .background(if (selected) HudTealSurface else Color.Transparent)
             .then(
                 if (selected) {
-                    Modifier.border(1.dp, HudAccentCyan.copy(alpha = 0.55f), CircleShape)
+                    Modifier.border(1.dp, HudAccentCyan.copy(alpha = 0.55f), RoundedCornerShape(22.dp))
                 } else {
                     Modifier
                 }

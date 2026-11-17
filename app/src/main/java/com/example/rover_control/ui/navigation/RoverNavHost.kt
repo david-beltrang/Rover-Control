@@ -65,9 +65,9 @@ fun RoverNavHost() {
         containerColor = Background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
-            // The Control screen owns the HUD bottom pill and immersive
-            // landscape layout. The shared bar stays for Telemetry/Connection.
-            if (currentRoute != Routes.CONTROL) {
+            // Control and Telemetry own their HUD bottom pills. The shared bar
+            // stays for the portrait Connection destination.
+            if (currentRoute != Routes.CONTROL && currentRoute != Routes.TELEMETRY) {
                 NavigationBar(
                     containerColor = SurfaceDark,
                     tonalElevation = 0.dp
@@ -132,7 +132,16 @@ fun RoverNavHost() {
                 )
             }
             composable(Routes.TELEMETRY) {
-                TelemetryScreen()
+                TelemetryScreen(
+                    onOpenControl = {
+                        if (connected) navController.navigateTopLevel(Routes.CONTROL)
+                    },
+                    onOpenConnection = {
+                        navController.navigate(Routes.CONNECTION) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
             }
         }
     }

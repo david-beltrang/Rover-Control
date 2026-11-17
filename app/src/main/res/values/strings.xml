@@ -61,6 +61,7 @@
     <string name="control_lights_on">LIGHTS ON</string>
     <string name="control_lights_off">LIGHTS OFF</string>
     <string name="control_lights_label">LIGHTS</string>
+    <string name="control_off">OFF</string>
     <string name="control_reset_speed">Reset Speed</string>
     <string name="control_input_mode">Input mode</string>
     <string name="control_input_joystick">Joystick</string>
@@ -117,11 +118,62 @@
     <string name="telemetry_hint_tilt">Tilt!</string>
     <string name="telemetry_hint_clear">Clear</string>
 
+    <!-- Telemetry HUD -->
+    <string name="telemetry_badge_ambient">AMBIENT</string>
+    <string name="telemetry_badge_humidity">HUMIDITY</string>
+    <string name="telemetry_badge_dark">DARK</string>
+    <string name="telemetry_badge_dim">DIM</string>
+    <string name="telemetry_badge_bright">BRIGHT</string>
+    <string name="telemetry_badge_ultrasonic">ULTRASONIC</string>
+    <string name="telemetry_label_temperature">TEMPERATURE</string>
+    <string name="telemetry_label_humidity">RELATIVE HUMIDITY</string>
+    <string name="telemetry_temperature_range">Range: 20° -\n35°C</string>
+    <string name="telemetry_status_optimal">OPTIMAL</string>
+    <string name="telemetry_status_low">LOW</string>
+    <string name="telemetry_status_high">HIGH</string>
+    <string name="telemetry_status_normal">NORMAL</string>
+    <string name="telemetry_status_dry">DRY</string>
+    <string name="telemetry_status_humid">HUMID</string>
+    <string name="telemetry_status_no_data">NO DATA</string>
+    <string name="telemetry_status_active">ACTIVE</string>
+    <string name="telemetry_status_caution">CAUTION</string>
+    <string name="telemetry_status_danger">DANGER</string>
+    <string name="telemetry_status_stable">STABLE</string>
+    <string name="telemetry_status_tilted">TILTED</string>
+    <string name="telemetry_light_sensor">Light Sensor</string>
+    <string name="telemetry_light_subtitle">DIGITAL PHOTOMETER</string>
+    <string name="telemetry_light_intensity">LIGHT INTENSITY</string>
+    <string name="telemetry_light_level">%1$d%% LEVEL</string>
+    <string name="telemetry_light_exposure_high">High exposure</string>
+    <string name="telemetry_light_exposure_medium">Medium exposure</string>
+    <string name="telemetry_light_exposure_low">Low exposure</string>
+    <string name="telemetry_distance_sensor">Distance Sensor</string>
+    <string name="telemetry_distance_subtitle">FRONT PROXIMITY</string>
+    <string name="telemetry_distance_label">DISTANCE\nOBSTACLE</string>
+    <string name="telemetry_distance_meters">(%1$.2f m)</string>
+    <string name="telemetry_distance_no_reading">No distance reading</string>
+    <string name="telemetry_distance_clear">Safe zone (&gt;30 cm)</string>
+    <string name="telemetry_distance_caution">Caution (&lt;30 cm)</string>
+    <string name="telemetry_distance_danger">Obstacle (&lt;20 cm)</string>
+    <string name="telemetry_detection">DETECTION</string>
+    <string name="telemetry_beam_angle">BEAM\nANGLE</string>
+    <string name="telemetry_beam_cone">±15°\nCONE</string>
+    <string name="telemetry_tilt_sensor">Tilt Sensor</string>
+    <string name="telemetry_tilt_subtitle">GYROSCOPE &amp; LEVEL</string>
+    <string name="telemetry_label_inclination">INCLINATION</string>
+    <string name="telemetry_label_pitch">PITCH</string>
+    <string name="telemetry_label_roll">ROLL</string>
+    <string name="telemetry_label_slope">SLOPE\nTERRAIN</string>
+    <string name="telemetry_degrees_value">%1$s°</string>
+    <string name="telemetry_slope_percent">%1$.1f%%</string>
+    <string name="telemetry_connection_demo">DEMO MODE</string>
+
     <!-- Units -->
     <string name="unit_celsius">°C</string>
     <string name="unit_percent">%</string>
     <string name="unit_centimeters">cm</string>
     <string name="unit_degrees">°</string>
+    <string name="unit_lux">Lux</string>
     <string name="value_placeholder">—</string>
 
     <!-- Common -->
