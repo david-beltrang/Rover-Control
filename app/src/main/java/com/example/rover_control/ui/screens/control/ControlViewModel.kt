@@ -24,6 +24,7 @@ data class ControlUiState(
     val inputMode: InputMode = InputMode.DPAD,
     val speedPercent: Float = speedByteToPercent(DEFAULT_SPEED),
     val headlightsOn: Boolean = false,
+    val isBuzzerActive: Boolean = false,
     val isStopped: Boolean = false,
     val isEngineOn: Boolean = true,
     val isTurboActive: Boolean = false
@@ -168,6 +169,12 @@ class ControlViewModel(application: Application) : AndroidViewModel(application)
         _uiState.update { it.copy(headlightsOn = on) }
         repository.sendCommand(RoverCommand.Headlights(on))
         viewModelScope.launch { settingsRepository.setHeadlightsOn(on) }
+    }
+
+    fun setBuzzer(on: Boolean) {
+        if (_uiState.value.isStopped) return
+        _uiState.update { it.copy(isBuzzerActive = on) }
+        repository.sendCommand(RoverCommand.Buzzer(on))
     }
 
     fun setInputMode(mode: InputMode) {

@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.ReportProblem
@@ -189,6 +190,7 @@ fun ControlScreen(
                 SpeedPanel(
                     speedPercent = uiState.speedPercent,
                     headlightsOn = uiState.headlightsOn,
+                    isBuzzerActive = uiState.isBuzzerActive,
                     isEngineOn = uiState.isEngineOn,
                     isTurboActive = uiState.isTurboActive,
                     controlsEnabled = controlsEnabled,
@@ -204,6 +206,13 @@ fun ControlScreen(
                     onLightsClick = {
                         hapticTap()
                         viewModel.toggleHeadlights(!uiState.headlightsOn)
+                    },
+                    onBuzzerPress = {
+                        hapticTap()
+                        viewModel.setBuzzer(true)
+                    },
+                    onBuzzerRelease = {
+                        viewModel.setBuzzer(false)
                     },
                     onTurboClick = {
                         hapticTap()
@@ -453,6 +462,7 @@ private fun DirectionPanel(
 private fun SpeedPanel(
     speedPercent: Float,
     headlightsOn: Boolean,
+    isBuzzerActive: Boolean,
     isEngineOn: Boolean,
     isTurboActive: Boolean,
     controlsEnabled: Boolean,
@@ -462,6 +472,8 @@ private fun SpeedPanel(
     onSpeedChange: (Float) -> Unit,
     onEngineClick: () -> Unit,
     onLightsClick: () -> Unit,
+    onBuzzerPress: () -> Unit,
+    onBuzzerRelease: () -> Unit,
     onTurboClick: () -> Unit,
     onBrakeClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -479,7 +491,7 @@ private fun SpeedPanel(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            val circleSize = minOf(68.dp, (maxHeight * 0.36f).coerceAtLeast(48.dp))
+            val circleSize = minOf(56.dp, (maxHeight * 0.34f).coerceAtLeast(44.dp))
             val pillHeight = minOf(44.dp, (maxHeight * 0.23f).coerceAtLeast(34.dp))
 
             Row(Modifier.fillMaxSize()) {
@@ -502,7 +514,7 @@ private fun SpeedPanel(
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         HudCircleButton(
@@ -535,6 +547,17 @@ private fun SpeedPanel(
                             dashedBorder = false,
                             enabled = lightsEnabled,
                             onClick = onLightsClick,
+                            modifier = Modifier.size(circleSize)
+                        )
+                        HudCircleButton(
+                            icon = Icons.Filled.Campaign,
+                            title = stringResource(R.string.control_honk),
+                            subtitle = stringResource(R.string.control_honk_subtitle),
+                            active = isBuzzerActive,
+                            dashedBorder = false,
+                            enabled = lightsEnabled,
+                            onPress = onBuzzerPress,
+                            onRelease = onBuzzerRelease,
                             modifier = Modifier.size(circleSize)
                         )
                     }
