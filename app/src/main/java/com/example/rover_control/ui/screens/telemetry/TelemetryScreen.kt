@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,7 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Radar
-import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WaterDrop
@@ -58,7 +56,6 @@ import com.example.rover_control.data.protocol.Telemetry
 import com.example.rover_control.ui.components.HudBottomTabBar
 import com.example.rover_control.ui.components.HudTab
 import com.example.rover_control.ui.components.TelemetryBadge
-import com.example.rover_control.ui.components.TelemetryGyroRadar
 import com.example.rover_control.ui.components.TelemetryInsetBox
 import com.example.rover_control.ui.components.TelemetryMetricLabel
 import com.example.rover_control.ui.components.TelemetryNumberFont
@@ -77,10 +74,7 @@ import com.example.rover_control.ui.theme.TelemetryHudTextSecondary
 import com.example.rover_control.ui.theme.TelemetryHudTrack
 import com.example.rover_control.ui.theme.WarningAmber
 import java.util.Locale
-import kotlin.math.PI
-import kotlin.math.abs
 import kotlin.math.roundToInt
-import kotlin.math.tan
 
 @Composable
 fun TelemetryScreen(
@@ -165,11 +159,6 @@ fun TelemetryScreen(
                 )
 
                 DistanceSensorCard(
-                    telemetry = uiState.telemetry,
-                    stale = uiState.isStale
-                )
-
-                InclinationSensorCard(
                     telemetry = uiState.telemetry,
                     stale = uiState.isStale
                 )
@@ -748,232 +737,5 @@ private fun DistanceSensorCard(
     }
 }
 
-@Composable
-private fun InclinationSensorCard(
-    telemetry: Telemetry,
-    stale: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val inclination = telemetry.inclinationDeg
-    // The current rover protocol exposes a single inclination value. Use it as
-    // pitch and keep the roll axis level until the firmware reports both axes.
-    val pitch = inclination
-    val roll = 0f
-    val slope = inclination?.let {
-        (tan(it.toDouble() * PI / 180.0) * 100.0).toFloat()
-    }
-    val statusText = when {
-        inclination == null -> stringResource(R.string.telemetry_status_no_data)
-        abs(inclination) <= 15f -> stringResource(R.string.telemetry_status_stable)
-        abs(inclination) <= 25f -> stringResource(R.string.telemetry_status_caution)
-        else -> stringResource(R.string.telemetry_status_tilted)
-    }
-    val statusColor = when {
-        inclination == null -> TelemetryHudTextSecondary
-        abs(inclination) <= 15f -> TelemetryHudAccent
-        abs(inclination) <= 25f -> WarningAmber
-        else -> ErrorRed
-    }
-    val dimmed = stale || inclination == null
-    val inclinationText = inclination?.let {
-        stringResource(R.string.telemetry_degrees_value, formatOneDecimal(it))
-    } ?: stringResource(R.string.value_placeholder)
-    val pitchText = pitch?.let {
-        stringResource(R.string.telemetry_degrees_value, formatSignedOneDecimal(it))
-    } ?: stringResource(R.string.value_placeholder)
-    val rollText = stringResource(
-        R.string.telemetry_degrees_value,
-        formatSignedOneDecimal(roll)
-    )
-    val slopeText = slope?.let {
-        stringResource(R.string.telemetry_slope_percent, it)
-    } ?: stringResource(R.string.value_placeholder)
-
-    TelemetryPanel(modifier = modifier) {
-        TelemetrySectionHeader(
-            icon = Icons.Filled.ScreenRotation,
-            title = stringResource(R.string.telemetry_tilt_sensor),
-            subtitle = stringResource(R.string.telemetry_tilt_subtitle),
-            trailing = {
-                Text(
-                    text = statusText,
-                    color = if (dimmed) statusColor.copy(alpha = 0.55f) else statusColor,
-                    fontFamily = TelemetryNumberFont,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.9.sp,
-                    maxLines = 1
-                )
-            }
-        )
-
-        Spacer(Modifier.height(14.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(178.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            TelemetryInsetBox(
-                modifier = Modifier
-                    .weight(0.45f)
-                    .fillMaxHeight(),
-                contentPadding = 10.dp,
-                contentAlignment = Alignment.Center
-            ) {
-                TelemetryGyroRadar(
-                    pitch = pitch ?: 0f,
-                    roll = roll,
-                    active = inclination != null && !stale,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(0.55f)
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                TelemetryInsetBox(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentPadding = 8.dp,
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TelemetryMetricLabel(
-                            text = stringResource(R.string.telemetry_label_inclination)
-                        )
-                        Text(
-                            text = inclinationText,
-                            color = if (dimmed) {
-                                TelemetryHudAccent.copy(alpha = 0.4f)
-                            } else {
-                                TelemetryHudAccent
-                            },
-                            fontFamily = TelemetryNumberFont,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1
-                        )
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .weight(1.2f)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TelemetryInsetBox(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                        contentPadding = 8.dp,
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            TelemetryMetricLabel(
-                                text = stringResource(R.string.telemetry_label_pitch)
-                            )
-                            Spacer(Modifier.height(3.dp))
-                            Text(
-                                text = pitchText,
-                                color = if (dimmed) {
-                                    TelemetryHudTextPrimary.copy(alpha = 0.4f)
-                                } else {
-                                    TelemetryHudTextPrimary
-                                },
-                                fontFamily = TelemetryNumberFont,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                maxLines = 1
-                            )
-                        }
-                    }
-                    TelemetryInsetBox(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                        contentPadding = 8.dp,
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            TelemetryMetricLabel(
-                                text = stringResource(R.string.telemetry_label_roll)
-                            )
-                            Spacer(Modifier.height(3.dp))
-                            Text(
-                                text = rollText,
-                                color = if (dimmed) {
-                                    TelemetryHudAccent.copy(alpha = 0.4f)
-                                } else {
-                                    TelemetryHudAccent
-                                },
-                                fontFamily = TelemetryNumberFont,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                maxLines = 1
-                            )
-                        }
-                    }
-                }
-
-                TelemetryInsetBox(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentPadding = 8.dp,
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TelemetryMetricLabel(
-                            text = stringResource(R.string.telemetry_label_slope)
-                        )
-                        Text(
-                            text = slopeText,
-                            color = if (dimmed) {
-                                TelemetryHudAccent.copy(alpha = 0.4f)
-                            } else {
-                                TelemetryHudAccent
-                            },
-                            fontFamily = TelemetryNumberFont,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
 private fun formatOneDecimal(value: Float): String =
     String.format(Locale.getDefault(), "%.1f", value)
-
-private fun formatSignedOneDecimal(value: Float): String =
-    if (value > 0f) {
-        "+${formatOneDecimal(value)}"
-    } else {
-        formatOneDecimal(value)
-    }

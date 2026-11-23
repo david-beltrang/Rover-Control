@@ -45,8 +45,7 @@ class TelemetryParser {
             temperatureC = json.optFloatOrNull(KEY_TEMPERATURE) ?: last.temperatureC,
             humidityPercent = json.optFloatOrNull(KEY_HUMIDITY) ?: last.humidityPercent,
             lightRaw = json.optIntOrNull(KEY_LIGHT) ?: last.lightRaw,
-            distanceCm = json.optIntOrNull(KEY_DISTANCE) ?: last.distanceCm,
-            inclinationDeg = json.optFloatOrNull(KEY_INCLINATION) ?: last.inclinationDeg
+            distanceCm = json.optIntOrNull(KEY_DISTANCE) ?: last.distanceCm
         )
         last = merged
         return merged
@@ -74,6 +73,5 @@ class TelemetryParser {
         const val KEY_HUMIDITY = "h"
         const val KEY_LIGHT = "l"
         const val KEY_DISTANCE = "d"
-        const val KEY_INCLINATION = "i"
     }
 }

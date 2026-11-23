@@ -10,15 +10,13 @@ data class Telemetry(
     val temperatureC: Float? = null,
     val humidityPercent: Float? = null,
     val lightRaw: Int? = null,
-    val distanceCm: Int? = null,
-    val inclinationDeg: Float? = null
+    val distanceCm: Int? = null
 ) {
     val isEmpty: Boolean
         get() = temperatureC == null &&
             humidityPercent == null &&
             lightRaw == null &&
-            distanceCm == null &&
-            inclinationDeg == null
+            distanceCm == null
 
     companion object {
         val EMPTY = Telemetry()
