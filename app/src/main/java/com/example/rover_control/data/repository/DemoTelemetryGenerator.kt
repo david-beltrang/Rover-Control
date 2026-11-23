@@ -13,7 +13,6 @@ class DemoTelemetryGenerator(private val random: Random = Random.Default) {
         temperatureC = random.nextDouble(18.0, 35.0).toFloat(),
         humidityPercent = random.nextDouble(30.0, 90.0).toFloat(),
         lightRaw = random.nextInt(100, 901),
-        distanceCm = random.nextInt(5, 201),
-        inclinationDeg = random.nextDouble(0.0, 30.0).toFloat()
+        distanceCm = random.nextInt(5, 201)
     )
 }
