@@ -10,25 +10,23 @@ class TelemetryParserTest {
 
     @Test
     fun `parses a complete line`() {
-        val telemetry = parser.parse("""{"t":25.3,"h":60.2,"l":412,"d":35,"i":12}""")
+        val telemetry = parser.parse("""{"t":25.3,"h":60.2,"l":412,"d":35}""")
 
         assertEquals(25.3f, telemetry!!.temperatureC!!, 0.001f)
         assertEquals(60.2f, telemetry.humidityPercent!!, 0.001f)
         assertEquals(412, telemetry.lightRaw)
         assertEquals(35, telemetry.distanceCm)
-        assertEquals(12f, telemetry.inclinationDeg!!, 0.001f)
     }
 
     @Test
     fun `missing fields keep the last known values`() {
-        parser.parse("""{"t":25.3,"h":60.2,"l":412,"d":35,"i":12}""")
+        parser.parse("""{"t":25.3,"h":60.2,"l":412,"d":35}""")
         val telemetry = parser.parse("""{"t":26.0}""")!!
 
         assertEquals(26.0f, telemetry.temperatureC!!, 0.001f)
         assertEquals(60.2f, telemetry.humidityPercent!!, 0.001f)
         assertEquals(412, telemetry.lightRaw)
         assertEquals(35, telemetry.distanceCm)
-        assertEquals(12f, telemetry.inclinationDeg!!, 0.001f)
     }
 
     @Test
@@ -39,7 +37,6 @@ class TelemetryParserTest {
         assertNull(telemetry.humidityPercent)
         assertNull(telemetry.lightRaw)
         assertNull(telemetry.distanceCm)
-        assertNull(telemetry.inclinationDeg)
     }
 
     @Test

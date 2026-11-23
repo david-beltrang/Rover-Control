@@ -34,4 +34,10 @@ class CommandEncoderTest {
         assertEquals("W1\n", CommandEncoder.encodeToString(RoverCommand.Headlights(true)))
         assertEquals("W0\n", CommandEncoder.encodeToString(RoverCommand.Headlights(false)))
     }
+
+    @Test
+    fun `buzzer encodes to B1 and B0`() {
+        assertEquals("B1\n", CommandEncoder.encodeToString(RoverCommand.Buzzer(true)))
+        assertEquals("B0\n", CommandEncoder.encodeToString(RoverCommand.Buzzer(false)))
+    }
 }
