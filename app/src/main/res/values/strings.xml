@@ -62,6 +62,8 @@
     <string name="control_lights_off">LIGHTS OFF</string>
     <string name="control_lights_label">LIGHTS</string>
     <string name="control_off">OFF</string>
+    <string name="control_honk">HONK</string>
+    <string name="control_honk_subtitle">BEEP</string>
     <string name="control_reset_speed">Reset Speed</string>
     <string name="control_input_mode">Input mode</string>
     <string name="control_input_joystick">Joystick</string>
@@ -107,7 +109,6 @@
     <string name="telemetry_humidity">Humidity</string>
     <string name="telemetry_light">Light</string>
     <string name="telemetry_distance">Distance</string>
-    <string name="telemetry_inclination">Inclination</string>
     <string name="telemetry_hint_hot">Hot</string>
     <string name="telemetry_hint_humid">Humid</string>
     <string name="telemetry_hint_dark">Dark</string>
@@ -115,7 +116,6 @@
     <string name="telemetry_hint_bright">Bright</string>
     <string name="telemetry_hint_danger">Danger</string>
     <string name="telemetry_hint_near">Near</string>
-    <string name="telemetry_hint_tilt">Tilt!</string>
     <string name="telemetry_hint_clear">Clear</string>
 
     <!-- Telemetry HUD -->
@@ -138,8 +138,6 @@
     <string name="telemetry_status_active">ACTIVE</string>
     <string name="telemetry_status_caution">CAUTION</string>
     <string name="telemetry_status_danger">DANGER</string>
-    <string name="telemetry_status_stable">STABLE</string>
-    <string name="telemetry_status_tilted">TILTED</string>
     <string name="telemetry_light_sensor">Light Sensor</string>
     <string name="telemetry_light_subtitle">DIGITAL PHOTOMETER</string>
     <string name="telemetry_light_intensity">LIGHT INTENSITY</string>
@@ -156,16 +154,6 @@
     <string name="telemetry_distance_caution">Caution (&lt;30 cm)</string>
     <string name="telemetry_distance_danger">Obstacle (&lt;20 cm)</string>
     <string name="telemetry_detection">DETECTION</string>
-    <string name="telemetry_beam_angle">BEAM\nANGLE</string>
-    <string name="telemetry_beam_cone">±15°\nCONE</string>
-    <string name="telemetry_tilt_sensor">Tilt Sensor</string>
-    <string name="telemetry_tilt_subtitle">GYROSCOPE &amp; LEVEL</string>
-    <string name="telemetry_label_inclination">INCLINATION</string>
-    <string name="telemetry_label_pitch">PITCH</string>
-    <string name="telemetry_label_roll">ROLL</string>
-    <string name="telemetry_label_slope">SLOPE\nTERRAIN</string>
-    <string name="telemetry_degrees_value">%1$s°</string>
-    <string name="telemetry_slope_percent">%1$.1f%%</string>
     <string name="telemetry_connection_demo">DEMO MODE</string>
 
     <!-- Units -->
