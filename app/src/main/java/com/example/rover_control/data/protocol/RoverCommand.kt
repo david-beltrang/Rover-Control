@@ -14,5 +14,6 @@ sealed interface RoverCommand {
     data object Stop : RoverCommand
     data class SetSpeed(val value: Int) : RoverCommand
     data class Headlights(val on: Boolean) : RoverCommand
+    data class Buzzer(val on: Boolean) : RoverCommand
     data object EmergencyStop : RoverCommand
 }

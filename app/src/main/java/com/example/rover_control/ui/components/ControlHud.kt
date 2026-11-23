@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -740,16 +741,45 @@ internal fun HudCircleButton(
     active: Boolean,
     dashedBorder: Boolean,
     enabled: Boolean,
-    onClick: () -> Unit,
+    onClick: () -> Unit = {},
+    onPress: (() -> Unit)? = null,
+    onRelease: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val pressed by interactionSource.collectIsPressedAsState()
+    val isPressedState by interactionSource.collectIsPressedAsState()
+    var isHeldDown by remember { mutableStateOf(false) }
+    val pressed = isPressedState || isHeldDown
     val scale by animateFloatAsState(
         targetValue = if (pressed) 0.96f else 1f,
         label = "circleScale"
     )
-    val glow = active
+    val glow = active || isHeldDown
+
+    val clickModifier = if (onPress != null && onRelease != null) {
+        Modifier.pointerInput(enabled) {
+            if (!enabled) return@pointerInput
+            detectTapGestures(
+                onPress = {
+                    isHeldDown = true
+                    onPress()
+                    try {
+                        awaitRelease()
+                    } finally {
+                        isHeldDown = false
+                        onRelease()
+                    }
+                }
+            )
+        }
+    } else {
+        Modifier.clickable(
+            enabled = enabled,
+            interactionSource = interactionSource,
+            indication = null,
+            onClick = onClick
+        )
+    }
 
     Box(
         modifier = modifier
@@ -763,12 +793,7 @@ internal fun HudCircleButton(
                 corner = 34.dp
             )
             .clip(CircleShape)
-            .clickable(
-                enabled = enabled,
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            ),
+            .then(clickModifier),
         contentAlignment = Alignment.Center
     ) {
         Canvas(Modifier.fillMaxSize()) {
