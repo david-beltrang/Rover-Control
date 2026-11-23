@@ -182,9 +182,11 @@ be newline-terminated; telemetry is expected every 500 ms.
 ## Companion Arduino firmware
 
 The repository includes a ready-to-upload sketch at
-[`app/codigo_Arduino.ino`](app/codigo_Arduino.ino) for the original four-motor
-rover with an **Adafruit Motor Shield v1** (`AFMotor`) and an **HC-05/HC-06**
-module on `SoftwareSerial(9, 10)`.
+[`app/codigo_Arduino/codigo_Arduino.ino`](app/codigo_Arduino/codigo_Arduino.ino)
+for the four-motor rover with an **Adafruit Motor Shield** using either the
+classic `AFMotor` library or the **Adafruit Motor Shield R4 Compatible**
+(`AFMotor_R4.h`) library, plus an **HC-05/HC-06** module on
+`SoftwareSerial(9, 10)`.
 
 Upload it with the Arduino IDE, pair the HC-05 in Android Bluetooth settings,
 connect from the app, and the Control screen works without further firmware
@@ -295,7 +297,8 @@ distribution.
 
 ```text
 app/
-├── codigo_Arduino.ino      # companion firmware for the four-motor rover
+├── codigo_Arduino/
+│   └── codigo_Arduino.ino  # companion firmware for the four-motor rover
 └── src/main/
     ├── AndroidManifest.xml
     ├── java/com/example/rover_control/
