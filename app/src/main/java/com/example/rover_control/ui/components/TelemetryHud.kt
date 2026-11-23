@@ -1,7 +1,6 @@
 package com.example.rover_control.ui.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -470,76 +469,6 @@ internal fun TelemetrySegmentedBar(
                     )
             )
         }
-    }
-}
-
-@Composable
-internal fun TelemetryGyroRadar(
-    pitch: Float,
-    roll: Float,
-    active: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val targetX = (roll / 45f).coerceIn(-1f, 1f)
-    val targetY = (-pitch / 45f).coerceIn(-1f, 1f)
-    val bubbleX by animateFloatAsState(
-        targetValue = targetX,
-        animationSpec = tween(300),
-        label = "telemetryRadarX"
-    )
-    val bubbleY by animateFloatAsState(
-        targetValue = targetY,
-        animationSpec = tween(300),
-        label = "telemetryRadarY"
-    )
-    val bubbleColor = if (active) {
-        TelemetryHudAccent
-    } else {
-        TelemetryHudTextSecondary.copy(alpha = 0.55f)
-    }
-
-    Canvas(modifier = modifier) {
-        val center = Offset(size.width / 2f, size.height / 2f)
-        val outerRadius = min(size.width, size.height) * 0.38f
-
-        drawCircle(
-            color = TelemetryHudGrid,
-            radius = outerRadius,
-            center = center,
-            style = Stroke(width = 1.dp.toPx())
-        )
-        drawCircle(
-            color = TelemetryHudGrid.copy(alpha = 0.55f),
-            radius = outerRadius * 0.55f,
-            center = center,
-            style = Stroke(width = 1.dp.toPx())
-        )
-        drawLine(
-            color = TelemetryHudGrid.copy(alpha = 0.65f),
-            start = Offset(center.x - outerRadius, center.y),
-            end = Offset(center.x + outerRadius, center.y),
-            strokeWidth = 1.dp.toPx(),
-            cap = StrokeCap.Round
-        )
-        drawLine(
-            color = TelemetryHudGrid.copy(alpha = 0.65f),
-            start = Offset(center.x, center.y - outerRadius),
-            end = Offset(center.x, center.y + outerRadius),
-            strokeWidth = 1.dp.toPx(),
-            cap = StrokeCap.Round
-        )
-
-        val bubbleCenter = Offset(
-            x = center.x + bubbleX * outerRadius * 0.72f,
-            y = center.y + bubbleY * outerRadius * 0.72f
-        )
-        val bubbleRadius = 6.dp.toPx()
-
-        drawCircle(bubbleColor.copy(alpha = 0.08f), bubbleRadius * 2.8f, bubbleCenter)
-        drawCircle(bubbleColor.copy(alpha = 0.14f), bubbleRadius * 1.9f, bubbleCenter)
-        drawCircle(bubbleColor.copy(alpha = 0.24f), bubbleRadius * 1.35f, bubbleCenter)
-        drawCircle(bubbleColor, bubbleRadius, bubbleCenter)
-        drawCircle(TelemetryHudBackground, bubbleRadius * 0.42f, bubbleCenter)
     }
 }
 
